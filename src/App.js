@@ -18,7 +18,7 @@ import Messages from "./pages/Friends/pages/Messages";
 import { useNavigate } from "react-router-dom";
 function App() {
   window.env = {};
-  window.env.API = "https://workouts-tracker-api.herokuapp.com";
+  window.env.API = "http://localhost:4000";
   const Navigate = useNavigate();
   const [cookies, _, removeCookies] = useCookies(["user", "token"]);
   const [workoutUpdated, setWorkoutUpdated] = useState(null);

@@ -38,17 +38,21 @@ export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
       axios.get(`${window.env.API}/workouts/${WorkoutId}/basic`).then((res) => {
         let workout = res.data;
         workout.WorkoutId = WorkoutId;
-        AlertWorkout(workout, sender, content);
-        setWorkoutUpdated(workout);
+        if (sender.UserID != cookies.user.UserID) {
+          AlertWorkout(workout, sender, content);
+          setWorkoutUpdated(workout);
+        }
       });
     });
     socket.on("new-message", (UserId, username, message) => {
-      setToastData({
-        from: username + ":",
-        content: message,
-        link: "/messages/" + UserId,
-      });
-      setShow(true);
+      if (UserId != cookies.user.UserID) {
+        setToastData({
+          from: username + ":",
+          content: message,
+          link: "/messages/" + UserId,
+        });
+        setShow(true);
+      }
     });
   }
   return (
