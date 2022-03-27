@@ -8,7 +8,7 @@ import Toast from "react-bootstrap/Toast";
 import Home from "../pages/UserView/pages/Home";
 export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
   const [isOpen, setIsOpen] = useState(false);
-  const ProfileUrl = `http://10.0.0.19:4000/user/${cookies.user.UserID}/profile`;
+  const ProfileUrl = `${window.env.API}/user/${cookies.user.UserID}/profile`;
   const [imageUrl, setImageUrl] = useState(ProfileUrl);
   const [show, setShow] = useState(false);
   const [toastData, setToastData] = useState({});
@@ -17,7 +17,7 @@ export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
     const formData = new FormData();
     formData.append("ProfilePicture", File);
     axios
-      .post("http://10.0.0.19:4000/user/addPicture", formData)
+      .post(window.env.API + "/user/addPicture", formData)
       .then(() => setIsOpen(false));
   }
   function AlertWorkout(workout, sender, content) {
@@ -32,17 +32,15 @@ export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
   let socket;
   function Start() {
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token;
-    socket = io.connect("http://10.0.0.19:4001");
+    socket = io.connect(window.env.API);
     socket.emit("new-user", cookies.token);
     socket.on("new-comment", (WorkoutId, sender, content) => {
-      axios
-        .get(`http://10.0.0.19:4000/workouts/${WorkoutId}/basic`)
-        .then((res) => {
-          let workout = res.data;
-          workout.WorkoutId = WorkoutId;
-          AlertWorkout(workout, sender, content);
-          setWorkoutUpdated(workout);
-        });
+      axios.get(`${window.env.API}/workouts/${WorkoutId}/basic`).then((res) => {
+        let workout = res.data;
+        workout.WorkoutId = WorkoutId;
+        AlertWorkout(workout, sender, content);
+        setWorkoutUpdated(workout);
+      });
     });
     socket.on("new-message", (UserId, username, message) => {
       setToastData({

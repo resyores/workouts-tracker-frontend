@@ -20,12 +20,11 @@ export default function Login() {
   }
   function CheckIfToken() {
     if (cookies.token) Navigate("/Home", { replace: true });
-    console.error(cookies.token);
   }
   function handleSubmit(event) {
     event.preventDefault();
     axios
-      .post("http://10.0.0.19:4000/Auth/Login", { email, password })
+      .post(window.env.API + "/Auth/Login", { email, password })
       .then((res) => {
         if (res.data.isAuth) {
           setCookie("token", res.data.token, { path: "/" });
@@ -34,7 +33,6 @@ export default function Login() {
         }
       })
       .catch((err) => {
-        console.error(err.response.status);
         if (err.response.status == 400) {
           reset(err.response.data);
         }

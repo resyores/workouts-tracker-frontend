@@ -11,7 +11,6 @@ export default function ImageModal({ isOpen, setIsOpen, CurrentFile, upload }) {
   useEffect(() => {
     if (selectedFile) {
       setFileUrl(URL.createObjectURL(selectedFile));
-      console.error(URL.createObjectURL(selectedFile));
     }
   }, [selectedFile]);
 

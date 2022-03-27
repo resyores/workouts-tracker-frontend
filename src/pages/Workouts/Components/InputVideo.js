@@ -13,7 +13,6 @@ export default function InputVideo({ isOpen, setIsOpen, upload }) {
       setFileUrl(URL.createObjectURL(selectedFile));
     }
   }, [selectedFile]);
-  console.error(FileUrl);
   return (
     <Modal open={isOpen} width={25}>
       <div>

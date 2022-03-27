@@ -7,7 +7,7 @@ export default function VideoView({ WorkoutId, index, token }) {
       className="rounded mb-auto me-auto"
     >
       <source
-        src={`http://10.0.0.19:4000/SetVideo/${WorkoutId}/${index}/video.mp4?token=${token}`}
+        src={`${window.env.API}/SetVideo/${WorkoutId}/${index}/video.mp4?token=${token}`}
         type="video/mp4"
       />
     </video>

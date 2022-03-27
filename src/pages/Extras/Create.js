@@ -21,11 +21,10 @@ export default function Create() {
     let temp = [...workout];
     temp[index].exerciseid = value;
     setWorkout(temp);
-    console.error(temp);
   }
   function Start() {
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token;
-    axios.get("http://10.0.0.19:4000/exercises").then((res) => {
+    axios.get(window.env.API + "/exercises").then((res) => {
       exercises = res.data;
       setOptions(
         exercises.map((exer) => {
@@ -41,7 +40,6 @@ export default function Create() {
     let temp = [...workout];
     let exerset = temp[index].sets;
     let set;
-    console.error(exerset.length);
     if (exerset.length > 0) set = { ...exerset[exerset.length - 1] };
     else set = { reps: 0, weight: 0 };
     exerset.push(set);
@@ -61,7 +59,7 @@ export default function Create() {
     });
     if (finalWorkout.length == 0) return;
     axios
-      .post("http://10.0.0.19:4000/workouts/add", {
+      .post(window.env.API + "/workouts/add", {
         exersets: finalWorkout,
         public: isPublic,
         title,
@@ -147,7 +145,7 @@ export default function Create() {
             <div className="d-flex">
               {exerSet.exerciseid >= 0 && (
                 <img
-                  src={"http://10.0.0.19:4000/exercises/" + exerSet.exerciseid}
+                  src={window.env.API + "/exercises/" + exerSet.exerciseid}
                   height={80}
                   width={80}
                   className="rounded me-3 mb-4"

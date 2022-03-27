@@ -20,7 +20,7 @@ export default function Comments({
   function postComment() {
     if (commentWrite) {
       axios
-        .post("http://10.0.0.19:4000/comment/" + id, { content: commentWrite })
+        .post(window.env.API + "/comment/" + id, { content: commentWrite })
         .then((res) => {
           setComments([
             {

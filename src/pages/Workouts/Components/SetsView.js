@@ -5,7 +5,8 @@ export default function SetsView({
   workout,
   setCurrSetNum,
   WorkoutId,
-  token,isCreator
+  token,
+  isCreator,
 }) {
   return (
     <div id="workouts" className={isCommentOpen ? "w-75" : "w-100"}>
@@ -13,9 +14,7 @@ export default function SetsView({
         return (
           <div className="d-flex align-items-center justify-content-center">
             <img
-              src={
-                "http://10.0.0.19:4000/exercises/" + exerSet.exercise.exerciseid
-              }
+              src={window.env.API + "/exercises/" + exerSet.exercise.exerciseid}
               height={exerSet.size}
               width={exerSet.size}
               className="rounded me-3 mb-0"

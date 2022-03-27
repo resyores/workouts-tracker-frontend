@@ -33,23 +33,22 @@ export default function Messages() {
     "",
     pageNumber,
     cookies.token,
-    "http://10.0.0.19:4000/messages/" + id,
+    window.env.API + "/messages/" + id,
     true
   );
   useEffect(Start, []);
   let socket;
   function Start() {
-    socket = io.connect("http://10.0.0.19:4001");
+    socket = io.connect(window.env.API);
     socket.emit("enter-chat", id, cookies.token);
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token; // for all requests
     axios
-      .get("http://10.0.0.19:4000/user/" + id + "/userdata")
+      .get(window.env.API + "/user/" + id + "/userdata")
       .then((res) => {
         setFriend(res.data.userdata);
         setIsAuth(res.data.isauth);
         if (!socket) return;
         socket.on("message", (message) => {
-          console.error(message);
           setMessages((prveMessages) => [
             { senderid: id, content: message },
             ...prveMessages,
@@ -62,14 +61,13 @@ export default function Messages() {
   }
   useEffect(() => {
     return () => {
-      if(socket)
-      socket.close()
+      if (socket) socket.close();
     };
   }, []);
   function SendMessage() {
     if (!write) return;
     axios
-      .post("http://10.0.0.19:4000/messages/send/" + id, {
+      .post(window.env.API + "/messages/send/" + id, {
         content: write,
       })
       .then((res) => {
@@ -86,7 +84,10 @@ export default function Messages() {
       <FriendRow friend={{ ...friend, UserId: id }} clickable={true} />
       {isAuth ? (
         <>
-          <div style={styles} className="d-flex flex-column-reverse w-75v list-group">
+          <div
+            style={styles}
+            className="d-flex flex-column-reverse w-75v list-group"
+          >
             {messages.map((message, index) => {
               if (messages.length - 1 == index)
                 return (

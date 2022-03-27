@@ -1,5 +1,4 @@
-import React, { useEffect,useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useCookies } from "react-cookie";
@@ -18,6 +17,8 @@ import { Route, Routes } from "react-router-dom";
 import Messages from "./pages/Friends/pages/Messages";
 import { useNavigate } from "react-router-dom";
 function App() {
+  window.env = {};
+  window.env.API = "https://workouts-tracker-api.herokuapp.com/";
   const Navigate = useNavigate();
   const [cookies, _, removeCookies] = useCookies(["user", "token"]);
   const [workoutUpdated, setWorkoutUpdated] = useState(null);

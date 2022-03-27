@@ -47,11 +47,11 @@ export default function SignUp() {
       return;
     }
     axios
-      .post("http://10.0.0.19:4000/Auth/SignUp", { username, email, password })
+      .post(window.env.API + "/Auth/SignUp", { username, email, password })
       .then((res) => {
         if (res.status == 201) {
           axios
-            .post("http://10.0.0.19:4000/Auth/Login", { email, password })
+            .post(window.env.API + "/Auth/Login", { email, password })
             .then((res) => {
               if (res.data.isAuth) {
                 setCookie("token", res.data.token, { path: "/" });

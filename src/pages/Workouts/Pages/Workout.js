@@ -25,8 +25,8 @@ export default function Workout() {
   const [currSetNum, setCurrSetNum] = useState(-1);
   let socket;
   let targetUrl = cookies.user
-    ? "http://10.0.0.19:4000/comment/" + id
-    : "http://10.0.0.19:4000/exercises";
+    ? window.env.API + "/comment/" + id
+    : window.env.API + "/exercises";
   const {
     loading,
     error,
@@ -56,7 +56,7 @@ export default function Workout() {
     const formData = new FormData();
     formData.append("video", File);
     axios
-      .post(`http://10.0.0.19:4000/SetVideo/${id}/${currSetNum}`, formData)
+      .post(`${window.env.API}/SetVideo/${id}/${currSetNum}`, formData)
       .then((res) => {
         setCurrSetNum(-1);
         setIsVideoOpen(false);
@@ -69,11 +69,11 @@ export default function Workout() {
   }
   useEffect(Start, []);
   function Start() {
-    socket = io.connect("http://10.0.0.19:4001");
+    socket = io.connect(window.env.API);
     socket.emit("enter-room", id, cookies.token);
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token;
     axios
-      .get("http://10.0.0.19:4000/workouts/" + id)
+      .get(window.env.API + "/workouts/" + id)
       .then((res) => {
         let index = -1;
         setWorkout([

@@ -11,15 +11,15 @@ export default function Friends() {
   useEffect(Start, []);
   function Start() {
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token; // for all requests
-    axios.get("http://10.0.0.19:4000/invites").then((res) => {
+    axios.get(window.env.API + "/invites").then((res) => {
       setInvites(res.data);
     });
   }
-  function proccess(InviterId, accept) {
+  function processs(InviterId, accept) {
     let action = "reject";
     if (accept) action = "accept";
     axios
-      .post("http://10.0.0.19:4000/invites/" + InviterId + "/" + action)
+      .post(window.env.API + "/invites/" + InviterId + "/" + action)
       .then((res) => {
         setInvites(invites.filter((invite) => invite.InviterId != InviterId));
       });
@@ -39,7 +39,7 @@ export default function Friends() {
           <Button
             size="lg"
             onClick={() => {
-              proccess(invite.InviterId, true);
+              processs(invite.InviterId, true);
             }}
             className="rounded btn-sm btn h-25 mt-4 btn-light btn-outline-success"
           >
@@ -48,7 +48,7 @@ export default function Friends() {
           <Button
             size="lg"
             onClick={() => {
-              proccess(invite.InviterId, false);
+              processs(invite.InviterId, false);
             }}
             className="rounded btn-sm btn h-25  mt-4 btn-light btn-outline-danger"
           >

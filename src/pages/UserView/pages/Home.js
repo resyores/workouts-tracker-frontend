@@ -13,8 +13,8 @@ export default function Home({ workoutUpdated, setWorkoutUpdated }) {
   const [show, setShow] = useState(false);
   const [toastData, setToastData] = useState({});
   let targetUrl = cookies.user
-    ? "http://10.0.0.19:4000/user/" + cookies.user.UserID + "/workouts"
-    : "http://10.0.0.19:4000/exercises";
+    ? window.env.API + "/user/" + cookies.user.UserID + "/workouts"
+    : window.env.API + "/exercises";
   const {
     loading,
     error,
@@ -44,7 +44,7 @@ export default function Home({ workoutUpdated, setWorkoutUpdated }) {
     setPageNumber(1);
   }
   function onDelete(WorkoutId) {
-    axios.delete("http://10.0.0.19:4000/workouts/" + WorkoutId).then((res) => {
+    axios.delete(window.env.API + "/workouts/" + WorkoutId).then((res) => {
       setWorkouts(workouts.filter((workout) => workout.WorkoutId != WorkoutId));
     });
   }
@@ -54,7 +54,8 @@ export default function Home({ workoutUpdated, setWorkoutUpdated }) {
     )[0].public;
     axios
       .patch(
-        "http://10.0.0.19:4000/workouts/" +
+        window.env.API +
+          "/workouts/" +
           WorkoutId +
           "/changeState/" +
           Number(!isPublic)

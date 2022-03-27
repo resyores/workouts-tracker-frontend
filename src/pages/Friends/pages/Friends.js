@@ -22,13 +22,13 @@ export default function Friends() {
   };
   function Start() {
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token; // for all requests
-    axios.get("http://10.0.0.19:4000/friends").then((res) => {
+    axios.get(window.env.API + "/friends").then((res) => {
       if (res.status == 200) setFriends(res.data);
     });
   }
   function Invite(UserToRequest) {
     axios
-      .post("http://10.0.0.19:4000/invites/add/" + UserToRequest)
+      .post(window.env.API + "/invites/add/" + UserToRequest)
       .then((res) => {
         setRequested(true);
         setTimeout(() => {

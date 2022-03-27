@@ -21,8 +21,8 @@ export default function FriendWorkouts() {
   const [pageNumber, setPageNumber] = useState(1);
   const [invited, setInvited] = useState(false);
   let targetUrl = cookies.user
-    ? "http://10.0.0.19:4000/user/" + id + "/workouts"
-    : "http://10.0.0.19:4000/exercises";
+    ? window.env.API + "/user/" + id + "/workouts"
+    : window.env.API + "/exercises";
   const {
     loading,
     error,
@@ -63,7 +63,7 @@ export default function FriendWorkouts() {
   function Start() {
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token; // for all requests
     axios
-      .get("http://10.0.0.19:4000/user/" + id + "/userdata")
+      .get(window.env.API + "/user/" + id + "/userdata")
       .then((res) => {
         setFriend(res.data.userdata);
         if (res.data.isauth) {
@@ -81,13 +81,13 @@ export default function FriendWorkouts() {
       });
   }
   function unFriend(id) {
-    axios.delete("http://10.0.0.19:4000/friends/" + id).then((res) => {
+    axios.delete(window.env.API + "/friends/" + id).then((res) => {
       Navigate("/friends");
     });
   }
   function Invite(friend) {
     axios
-      .post("http://10.0.0.19:4000/invites/add/" + friend.UserName)
+      .post(window.env.API + "/invites/add/" + friend.UserName)
       .then((res) => {
         setIsModalOpen(true);
         setTimeout(() => {
@@ -103,7 +103,11 @@ export default function FriendWorkouts() {
         <Modal open={isModalOpen}>
           <h2 className="text-success text-center mt-4">Requested</h2>
         </Modal>
-        <FriendRow friend={{ ...friend, UserId: id }} clickable={false} isNotFriend={!isAuth}/>
+        <FriendRow
+          friend={{ ...friend, UserId: id }}
+          clickable={false}
+          isNotFriend={!isAuth}
+        />
         <ActionButton
           FriendId={id}
           UserId={cookies.user.UserID}
