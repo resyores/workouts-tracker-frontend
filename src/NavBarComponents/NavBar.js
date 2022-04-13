@@ -158,7 +158,9 @@ export default function Navbar({ cookies, logout, setMiddleMan }) {
       </nav>
       <Toast onClose={() => setShow(false)} show={show} delay={3000} autohide>
         <Toast.Header>
-          <strong className="me-auto">{toastData.from}</strong>
+          <a href={toastData.link} className="me-auto">
+            <strong>{toastData.from}</strong>
+          </a>
           <small>just now</small>
         </Toast.Header>
         <a href={toastData.link} className="text-decoration-none">
