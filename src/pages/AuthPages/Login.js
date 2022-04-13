@@ -14,7 +14,7 @@ const popover = (
   <Popover>
     <Popover.Header as="h3">Demo Mode</Popover.Header>
     <Popover.Body>
-      Press Here if you only want a demo and don't forget to check the demo
+      Press Here if you only want a demo and don't forget to check out the demo
       actions
     </Popover.Body>
   </Popover>
