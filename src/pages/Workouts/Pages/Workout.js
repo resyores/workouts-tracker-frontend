@@ -10,7 +10,7 @@ import SetsView from "../Components/SetsView";
 import useLoader from "../../../Hooks/useLoader";
 import useObserver from "../../../Hooks/useObserver";
 import InputVideo from "../Components/InputVideo";
-export default function Workout() {
+export default function Workout({ workoutChanged, setWorkoutChanged }) {
   const id = parseInt(window.location.href.split("/")[4]);
   const Navigate = useNavigate();
   const [cookies, _] = useCookies();
@@ -23,6 +23,7 @@ export default function Workout() {
   const [pageNumber, setPageNumber] = useState(1);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [currSetNum, setCurrSetNum] = useState(-1);
+  const [refreshVideo, setRefreshVideo] = useState(0);
   let socket;
   let targetUrl = cookies.user
     ? window.env.API + "/comment/" + id
@@ -43,6 +44,13 @@ export default function Workout() {
     return <small className="ms-4 mt-3"> by {userName}</small>;
   };
   useEffect(() => {
+    if (workoutChanged) {
+      loadWorkout();
+      setWorkoutChanged(false);
+    }
+  },  [workoutChanged]);
+  useEffect(() => {
+    setWorkoutChanged(false);
     axios.defaults.headers.common["authorization"] = "bearer " + cookies.token;
   }, []);
   useEffect(() => {
@@ -60,28 +68,24 @@ export default function Workout() {
       .then((res) => {
         setCurrSetNum(-1);
         setIsVideoOpen(false);
-        window.location.reload(false);
+        loadWorkout();
+        setRefreshVideo(Date.now());
       })
-      .catch((err) => {
+      .catch(() => {
         setCurrSetNum(-1);
         setIsVideoOpen(false);
       });
   }
-  useEffect(Start, []);
-  function Start() {
-    socket = io.connect(window.env.API);
-    socket.emit("enter-room", id, cookies.token);
-    axios.defaults.headers.common["authorization"] = "bearer " + cookies.token;
-    axios
-      .get(window.env.API + "/workouts/" + id)
-      .then((res) => {
-        let index = -1;
+  function loadWorkout() {
+    return new Promise((resolve) => {
+      let index = -1;
+      axios.get(window.env.API + "/workouts/" + id).then((res) => {
         setWorkout([
           ...res.data.exersets.map((exerSet) => {
             let newExerSet = exerSet;
             newExerSet.sets = newExerSet.sets.map((set) => {
               index++;
-              return { ...set, index: index };
+              return { ...set, index };
             });
             return {
               ...newExerSet,
@@ -89,10 +93,27 @@ export default function Workout() {
             };
           }),
         ]);
-        setTitle(res.data.title);
-        setPublic(res.data.public);
-        setUserName(res.data.username);
-        setDate(new Date(res.data.date));
+
+        resolve([
+          res.data.title,
+          res.data.public,
+          res.data.username,
+          res.data.date,
+        ]);
+      });
+    });
+  }
+  useEffect(Start, []);
+  function Start() {
+    socket = io.connect(window.env.API);
+    socket.emit("enter-room", id, cookies.token);
+    axios.defaults.headers.common["authorization"] = "bearer " + cookies.token;
+    loadWorkout()
+      .then(([title, DataPublic, DataUsername, DataDate]) => {
+        setTitle(title);
+        setPublic(DataPublic);
+        setUserName(DataUsername);
+        setDate(new Date(DataDate));
         if (!socket) return;
         socket.on("chat-message", ({ user, message }) => {
           if (user.UserID != cookies.user.UserID) {
@@ -119,7 +140,11 @@ export default function Workout() {
       if (socket) socket.close();
     };
   }, []);
-
+  function deleteWorkout() {
+    axios
+      .delete(window.env.API + "/workouts/" + id)
+      .then((res) => Navigate("/Home", { replace: true }));
+  }
   function publicToString() {
     if (isPublic) return <h3 class="text-info">public</h3>;
     return <h4 class="text-muted me-1">private</h4>;
@@ -134,6 +159,8 @@ export default function Workout() {
           publicToString,
           commentLogo,
           onClickCommentsButton,
+          deleteWorkout,
+          mine: userName == cookies.user.username,
         }}
       />
       <InputVideo
@@ -149,6 +176,7 @@ export default function Workout() {
           WorkoutId={id}
           token={cookies.token}
           isCreator={userName == cookies.user.username}
+          refreshVideo={refreshVideo}
         />
         {isCommentOpen && (
           <span className="w-50">

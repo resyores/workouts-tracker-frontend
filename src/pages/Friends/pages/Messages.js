@@ -6,6 +6,7 @@ import axios from "axios";
 import MessageRow from "../Components/MessageRow";
 import FriendRow from "../Components/FriendRow";
 import Button from "react-bootstrap/Button";
+import Field from "../../../BaseComponents/Field";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 const styles = {
@@ -49,10 +50,11 @@ export default function Messages() {
         setIsAuth(res.data.isauth);
         if (!socket) return;
         socket.on("message", (message) => {
-          setMessages((prveMessages) => [
-            { senderid: id, content: message },
-            ...prveMessages,
-          ]);
+          if (id != cookies.user.UserID)
+            setMessages((prveMessages) => [
+              { senderid: id, content: message },
+              ...prveMessages,
+            ]);
         });
       })
       .catch((err) => {
@@ -103,13 +105,16 @@ export default function Messages() {
               );
             })}
           </div>
-          <input
-            value={write}
-            onChange={(e) => {
-              setWrite(e.target.value);
-            }}
-          />
-          <Button onClick={SendMessage}> send</Button>
+          <div className="d-flex justify-content-center">
+            <Field value={write} setter={setWrite} />
+            <Button
+              className="btn-outline-success btn-light h-25 mt-4"
+              onClick={SendMessage}
+            >
+              {" "}
+              send
+            </Button>
+          </div>
         </>
       ) : (
         <h2 className="text-muted text-center mt-4">

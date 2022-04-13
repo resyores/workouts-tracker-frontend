@@ -2,31 +2,29 @@ import React, { useState } from "react";
 import Modal from "../../../BaseComponents/Modal";
 import Button from "react-bootstrap/Button";
 export default function Set({
-  exerciseName,
   reps,
   weight,
-  index,
   video,
-  openModal,isCreator
+  openModal,
+  isCreator,
+  setNum,
 }) {
-  let colors = ["info", "light"];
-  let color = "bg-" + colors[index % colors.length];
   const [videoOpen, setVideoOpen] = useState(false);
   const toggleVideo = () => {
     setVideoOpen(!videoOpen);
   };
   return (
-    <div className="d-flex">
-      <div className="list-group-item rounded  bg-secondary d-flex justify-content-around mt-0 w-100">
-        <h5
-          className={color + " w-50 rounded me-3 d-flex justify-content-center"}
-        >
-          {exerciseName}
-        </h5>
-        <h5 className="me-2 border border-dark">{weight} kg</h5>
-        <p>X {reps} Reps</p>
+    <>
+      <div className="rounded  d-flex justify-content-around  border border-secondary">
+        <p>{setNum + 1}</p>
+        <span className="d-flex">
+          <h5 className="me-2 border border-dark">{weight} kg</h5>
+          <p>X {reps} Reps</p>
+        </span>
         <div className="d-flex">
-          {isCreator&&<p onClick={openModal} className="bi-camera-reels-fill" />}
+          {isCreator && (
+            <p onClick={openModal} className="bi-camera-reels-fill" />
+          )}
           {video && <p onClick={toggleVideo} className="bi-file-play ms-2" />}
         </div>
       </div>
@@ -41,6 +39,6 @@ export default function Set({
           {video}
         </div>
       </Modal>
-    </div>
+    </>
   );
 }

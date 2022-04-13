@@ -11,7 +11,9 @@ export default function Workout({ friend, clickable, isNotFriend }) {
   };
   return (
     <div
-      className="d-flex list-group-item list-group-item-action rounded mt-2 bg-info"
+      className=
+        "d-flex list-group-item w-100 rounded mt-2 bg-light-green "
+      
       onClick={clickable && toPage}
     >
       <img

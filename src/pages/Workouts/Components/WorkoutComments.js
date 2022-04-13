@@ -4,7 +4,7 @@ import Comment from "./Comment";
 import Button from "react-bootstrap/Button";
 const styles = {
   position: "relative",
-  height: "300px",
+  height: "18rem",
   overflow: "auto",
   backgroundColor: "#F5F5F5",
   borderRadius: "10px",

@@ -18,6 +18,7 @@ export default function useLoader(
   }
   useEffect(() => setItems([]), [query]);
   useEffect(() => {
+    if (query == "" && pageNumber == 1) setItems([]);
     let cancel;
     axios
       .get(targetUrl, {

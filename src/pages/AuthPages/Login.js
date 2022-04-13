@@ -7,7 +7,18 @@ import { Link, useNavigate } from "react-router-dom";
 import "../../css/form.css";
 import axios from "axios";
 import { useCookies } from "react-cookie";
-
+import exampleWorkout from "../../utils/exampleWorkout";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Popover from "react-bootstrap/Popover";
+const popover = (
+  <Popover>
+    <Popover.Header as="h3">Demo Mode</Popover.Header>
+    <Popover.Body>
+      Press Here if you only want a demo and don't forget to check the demo
+      actions
+    </Popover.Body>
+  </Popover>
+);
 export default function Login() {
   const Navigate = useNavigate();
   const [cookies, setCookie] = useCookies(["user", "token"]);
@@ -15,6 +26,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [demoDisabled, setDemoDisabled] = useState(false);
   function validateForm(email, password) {
     return email.length > 0 && password.length > 0;
   }
@@ -42,6 +54,19 @@ export default function Login() {
     setError(error);
     setEmail("");
     setPassword("");
+  }
+  function CreateDemo(e) {
+    e.preventDefault();
+    setDemoDisabled(true);
+    axios.post(window.env.API + "/Demo/Start").then((res) => {
+      axios.defaults.headers.common["authorization"] =
+        "bearer " + res.data.token;
+      axios.post(window.env.API + "/workouts/add", exampleWorkout).then(() => {
+        setCookie("token", res.data.token, { path: "/" });
+        setCookie("user", { ...res.data.user, demo: true }, { path: "/" });
+        Navigate("/Home", { replace: true });
+      });
+    });
   }
 
   return (
@@ -74,16 +99,30 @@ export default function Login() {
           value={password}
           setter={setPassword}
         />
-        <Button
-          block
-          size="lg"
-          type="submit"
-          disabled={!validateForm(email, password)}
-          className="submit-btn"
-        >
-          Login
-        </Button>
-        <Link to="/SignUp">Create an account</Link>
+        <div className="d-flex flex-column">
+          <span>
+            <Button
+              block
+              size="lg"
+              type="submit"
+              disabled={!validateForm(email, password)}
+              className="submit-btn"
+            >
+              Login
+            </Button>
+
+            <Link to="/SignUp">Create an account</Link>
+          </span>
+          <OverlayTrigger placement="bottom" overlay={popover}>
+            <Button
+              className="btn-success w-50"
+              onClick={CreateDemo}
+              disabled={demoDisabled}
+            >
+              Demo
+            </Button>
+          </OverlayTrigger>
+        </div>
       </Form>
     </div>
   );

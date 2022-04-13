@@ -80,23 +80,24 @@ export default function Friends() {
   return (
     <>
       <Modal open={isOpen}>{Modalcontent(requestUserName, requested)}</Modal>
-      <div className="d-flex">
-        <Button
-          className="btn-outline-success btn-light btn-sml"
-          onClick={openRequestModal}
-        >
+      <div className="d-flex justify-content-center mt-3 ">
+        <Button className="btn-success w-25" onClick={openRequestModal}>
           Invite friend
         </Button>
         <a
           href="/requests"
-          className="btn-outline-warning btn-light btn btn-sml"
+          className="btn-outline-success bg-light-green btn w-25"
         >
           Friend Requests
         </a>
       </div>
-      {friends.map((friend) => {
-        return <Friend friend={friend} clickable={true} />;
-      })}
+      {friends.length ? (
+        friends.map((friend) => {
+          return <Friend friend={friend} clickable={true} />;
+        })
+      ) : (
+        <h3 className="text-muted text-center mt-2">No Current Friends</h3>
+      )}
     </>
   );
 }

@@ -7,7 +7,6 @@ import Login from "./pages/AuthPages/Login";
 import Base from "./pages/Extras/Base";
 import Home from "./pages/UserView/pages/Home";
 import FriendWorkouts from "./pages/UserView/pages/FriendWorkouts";
-
 import Create from "./pages/Extras/Create";
 import Workout from "./pages/Workouts/Pages/Workout";
 import Friends from "./pages/Friends/pages/Friends";
@@ -16,20 +15,20 @@ import NavBar from "./NavBarComponents/NavBar";
 import { Route, Routes } from "react-router-dom";
 import Messages from "./pages/Friends/pages/Messages";
 import { useNavigate } from "react-router-dom";
+import "./css/colors.css";
 function App() {
   window.env = {};
   window.env.API = "https://workouts-tracker-api.herokuapp.com";
   const Navigate = useNavigate();
   const [cookies, _, removeCookies] = useCookies(["user", "token"]);
-  const [workoutUpdated, setWorkoutUpdated] = useState(null);
+  const [middleMan, setMiddleMan] = useState(null);
   useEffect(() => {
-    const subPaths = window.location.href.split("/");
-    const path = subPaths[3].toLowerCase();
+    const path = window.location.pathname.toLowerCase();
     if (cookies.token && cookies.user) {
-      if (path == "signin" || path == "login") {
+      if (path == "/signin" || path == "/login") {
         Navigate("/Home", { replace: true });
       }
-    } else if ((path != "signup" && path != "login") || subPaths.length != 4) {
+    } else if (path != "/signup" && path != "/login") {
       logout();
     }
   });
@@ -39,13 +38,17 @@ function App() {
     Navigate("/Login", { replace: true });
   }
   return (
-    <div className="container">
+    <div
+      style={{
+        backgroundColor: "#E0E0E0",
+        width: "100%",
+        minHeight: "100%",
+        position: "absolute",
+        left: "0px",
+      }}
+    >
       {cookies.user && cookies.token && (
-        <NavBar
-          cookies={cookies}
-          logout={logout}
-          setWorkoutUpdated={setWorkoutUpdated}
-        />
+        <NavBar cookies={cookies} logout={logout} setMiddleMan={setMiddleMan} />
       )}
       <Routes>
         <Route exact path="/Login" element={<Login />} />
@@ -55,16 +58,22 @@ function App() {
           exact
           path="/home"
           element={
-            <Home
-              setWorkoutUpdated={setWorkoutUpdated}
-              workoutUpdated={workoutUpdated}
-            />
+            <Home setWorkoutUpdated={setMiddleMan} workoutUpdated={middleMan} />
           }
         />
 
         <Route exact path="/workouts/create" element={<Create />} />
 
-        <Route exact path="/workouts/:id" element={<Workout />} />
+        <Route
+          exact
+          path="/workouts/:id"
+          element={
+            <Workout
+              setWorkoutChanged={setMiddleMan}
+              workoutChanged={middleMan}
+            />
+          }
+        />
         <Route exact path="/friends" element={<Friends />} />
         <Route exact path="/requests" element={<Requests />} />
         <Route exact path="/friends/:id" element={<FriendWorkouts />} />

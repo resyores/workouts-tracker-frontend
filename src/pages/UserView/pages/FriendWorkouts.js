@@ -29,7 +29,7 @@ export default function FriendWorkouts() {
     hasMore,
     items: workouts,
     setItems: __,
-  } = useLoader(query, pageNumber, cookies.token, targetUrl);
+  } = useLoader("", pageNumber, cookies.token, targetUrl);
   const lastWorkoutElementRef = useObserver(loading, hasMore, setPageNumber);
   function handleSearch(event) {
     setQuery(event.target.value);

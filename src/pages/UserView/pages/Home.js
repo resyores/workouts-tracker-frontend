@@ -4,7 +4,6 @@ import axios from "axios";
 import useLoader from "../../../Hooks/useLoader";
 import useObserver from "../../../Hooks/useObserver";
 import WorkoutsView from "../Components/WorkoutsView";
-import io from "socket.io-client";
 import Toast from "react-bootstrap/Toast";
 export default function Home({ workoutUpdated, setWorkoutUpdated }) {
   const [cookies, _] = useCookies(["user", "token"]);
@@ -21,10 +20,13 @@ export default function Home({ workoutUpdated, setWorkoutUpdated }) {
     hasMore,
     items: workouts,
     setItems: setWorkouts,
-  } = useLoader(query, pageNumber, cookies.token, targetUrl);
+  } = useLoader("", pageNumber, cookies.token, targetUrl);
   const lastWorkoutElementRef = useObserver(loading, hasMore, setPageNumber);
   useEffect(() => {
-    if (workoutUpdated != null) {
+    setWorkoutUpdated(null);
+  }, []);
+  useEffect(() => {
+    if (workoutUpdated) {
       UpdateWorkout(workoutUpdated);
       setWorkoutUpdated(null);
     }
@@ -42,11 +44,6 @@ export default function Home({ workoutUpdated, setWorkoutUpdated }) {
   function handleSearch(event) {
     setQuery(event.target.value);
     setPageNumber(1);
-  }
-  function onDelete(WorkoutId) {
-    axios.delete(window.env.API + "/workouts/" + WorkoutId).then((res) => {
-      setWorkouts(workouts.filter((workout) => workout.WorkoutId != WorkoutId));
-    });
   }
   function changeState(WorkoutId) {
     let isPublic = workouts.filter(
@@ -86,7 +83,7 @@ export default function Home({ workoutUpdated, setWorkoutUpdated }) {
         message={"You have no workouts"}
         lastWorkoutElementRef={lastWorkoutElementRef}
         handleSearch={handleSearch}
-        functions={{ onDelete, changeState }}
+        changeState={changeState}
       />
     </>
   );

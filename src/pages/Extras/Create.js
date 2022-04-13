@@ -1,23 +1,48 @@
 import React, { useEffect, useState } from "react";
-import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Select from "react-select";
 import Field from "../../BaseComponents/Field";
+import Form from "react-bootstrap/Form";
+import Card from "react-bootstrap/Card";
 import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import axios from "axios";
+const styles = {
+  position: "relative",
+  overflow: "auto",
+  borderRadius: "10px",
+  width: "100%",
+};
+const SmallInput = ({ onChange, placeholder, last, value }) => {
+  return (
+    <input
+      type="number"
+      min="0"
+      class=" bg-transparent form-control rounded-0 text-center p-0"
+      style={{
+        border: 0,
+        borderBottom: "1px solid " + (last ? "#c5c5c5" : "#0000FF"),
+        width: "4rem",
+        MozAppearance: "textfield",
+      }}
+      placeholder={placeholder}
+      onChange={onChange}
+      value={value}
+    />
+  );
+};
 export default function Create() {
   const Navigate = useNavigate();
   const [cookies, _] = useCookies(["user", "token"]);
   let exercises = [];
   const [options, setOptions] = useState([]);
-  const [workout, setWorkout] = useState([]);
+  const [workout, setWorkout] = useState([
+    { exerciseid: -1, sets: [{ reps: "", weight: "" }] },
+  ]);
   const [title, setTitle] = useState("");
-  const [isPublic, setPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
   useEffect(Start, []);
 
-  function chooseExercise(selected) {
-    const [index, value] = selected.value.split(" ");
+  function chooseExercise(index, value) {
     let temp = [...workout];
     temp[index].exerciseid = value;
     setWorkout(temp);
@@ -34,33 +59,52 @@ export default function Create() {
     });
   }
   function addExer() {
-    setWorkout([...workout, { exerciseid: -1, sets: [] }]);
+    setWorkout([
+      ...workout,
+      { exerciseid: -1, sets: [{ reps: "", weight: "" }] },
+    ]);
   }
   function addSet(index) {
     let temp = [...workout];
-    let exerset = temp[index].sets;
-    let set;
-    if (exerset.length > 0) set = { ...exerset[exerset.length - 1] };
-    else set = { reps: 0, weight: 0 };
-    exerset.push(set);
+    temp[index].sets.push({ reps: "", weight: "" });
+    setWorkout(temp);
+  }
+  function setSetVal(exerIndex, setIndex, valueName, value) {
+    let temp = [...workout];
+    temp[exerIndex].sets[setIndex][valueName] = value;
     setWorkout(temp);
   }
   function publicToString() {
-    if (isPublic) return <h3 class="text-info">public</h3>;
-    return <h3 class="text-muted">private</h3>;
+    return isPublic ? (
+      <h3 class="text-info">public</h3>
+    ) : (
+      <h3 class="text-muted">private</h3>
+    );
   }
-  function handleSubmit(event) {
-    event.preventDefault();
+  function Create() {
+    if (!title) return alert("Workout must have title");
     let finalWorkout = [...workout];
-    finalWorkout.forEach((exerset, index) => {
-      if (exerset.exerciseid < 0 || exerset.sets.length == 0) {
-        finalWorkout.splice(index, 1);
-      }
+    let setExist = false;
+    finalWorkout.forEach((exerset, exerIndex) => {
+      if (exerset.exerciseid == -1) return finalWorkout.splice(exerIndex, 1);
+
+      exerset.sets.forEach((set, setIndex) => {
+        if (setIndex != exerset.sets.length - 1) {
+          if (set.reps == "" || set.weight == "")
+            exerset.sets.splice(setIndex, 1);
+          else setExist = true;
+        }
+      });
     });
-    if (finalWorkout.length == 0) return;
+    if (!setExist) return alert("Workout can't be empty");
     axios
       .post(window.env.API + "/workouts/add", {
-        exersets: finalWorkout,
+        exersets: finalWorkout.map((exerSet) => {
+          return {
+            exerciseid: exerSet.exerciseid,
+            sets: exerSet.sets.slice(0, -1),
+          };
+        }),
         public: isPublic,
         title,
       })
@@ -70,132 +114,140 @@ export default function Create() {
   }
   function removeExerSet(index) {
     let temp = [...workout];
-    temp.pop(index);
+    temp.splice(index, 1);
     setWorkout(temp);
   }
   function removeSet(index1, index2) {
     let temp = [...workout];
-    temp[index1].sets.pop(index2);
+    temp[index1].sets.splice(index2, 1);
     setWorkout(temp);
   }
-  function AddSetBtn({ index }) {
-    return (
-      <Button
-        className="btn-outline-info btn-light btn-sml"
-        onClick={() => {
-          addSet(index);
-        }}
-      >
-        <h5>+ Set</h5>
-      </Button>
-    );
-  }
-  function SetView({ index1, index2, set }) {
-    return (
-      <div class="d-flex flex-row">
-        <input
-          type="number"
-          class="form-group ms-2"
-          style={{ width: 50, height: 30 }}
-          defaultValue={set.weight}
-          min="0"
-          onChange={(event) => {
-            set.weight = parseInt(event.target.value);
-          }}
-        />
-        kg X
-        <input
-          type="number"
-          class="form-group ms-2"
-          style={{ width: 50, height: 30 }}
-          min="0"
-          defaultValue={set.reps}
-          onChange={(event) => {
-            set.reps = parseInt(event.target.value);
-          }}
-        />
-        reps
-        <Button
-          className="btn-outline-danger rounded-circle btn-light mt-auto btn-sm ms-1 mb-1"
-          onClick={() => {
-            removeSet(index1, index2);
-          }}
-        >
-          -
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <>
-      <Form onSubmit={handleSubmit}>
-        <div class="d-flex flex-row w-100">
-          <Field Name="title" Label="Title:" Type="text" setter={setTitle} />
-          <div
-            onClick={() => {
-              setPublic(!isPublic);
-            }}
-          >
-            {publicToString()}
-          </div>
-        </div>
-        {workout.map((exerSet, index) => {
+      <div className="d-flex mb-3 ms-3">
+        <Field Name="Title" setter={setTitle} placeholder="Workout Title" />
+        <span
+          onClick={() => {
+            setIsPublic(!isPublic);
+          }}
+          className="ms-3"
+        >
+          {publicToString(isPublic)}
+        </span>
+      </div>
+      <div className="d-flex align-items-center" style={styles}>
+        {workout.map((exerSet, exerIndex) => {
           return (
-            <div className="d-flex">
-              {exerSet.exerciseid >= 0 && (
-                <img
+            <Card
+              className="ms-3 bg-light-green"
+              style={{ minWidth: "15rem", minHeight: "20rem" }}
+            >
+              <Card.Title className="text-center rounded d-flex">
+                {workout.length > 1 && (
+                  <p
+                    className="bi bi-trash3"
+                    onClick={() => {
+                      removeExerSet(exerIndex);
+                    }}
+                  />
+                )}
+                <Form.Select
+                  value={exerSet.exerciseid}
+                  onChange={(e) => {
+                    chooseExercise(exerIndex, e.target.value);
+                  }}
+                >
+                  {exerSet.exerciseid == -1 && (
+                    <option>Open this select menu</option>
+                  )}
+                  {options.map((option) => {
+                    return <option value={option.value}>{option.label}</option>;
+                  })}
+                </Form.Select>
+              </Card.Title>
+              {exerSet.exerciseid != -1 && (
+                <Card.Img
+                  variant="top"
                   src={window.env.API + "/exercises/" + exerSet.exerciseid}
-                  height={80}
-                  width={80}
-                  className="rounded me-3 mb-4"
+                  height={110}
                 />
               )}
+              <Card.Body>
+                <Card.Text>
+                  {exerSet.sets.map((set, index) => {
+                    const last = index == exerSet.sets.length - 1;
+                    return (
+                      <div
+                        className="d-flex justify-content-center px-2"
+                        onClick={
+                          last
+                            ? () => {
+                                addSet(exerIndex);
+                              }
+                            : () => {}
+                        }
+                      >
+                        <SmallInput
+                          onChange={(e) => {
+                            setSetVal(
+                              exerIndex,
+                              index,
+                              "weight",
+                              e.target.value
+                            );
+                          }}
+                          placeholder="weight"
+                          last={last}
+                          value={set.weight}
+                        />
+                        {last ? (
+                          <span className="text-muted">x</span>
+                        ) : (
+                          <span>x</span>
+                        )}
+                        <SmallInput
+                          onChange={(e) => {
+                            setSetVal(exerIndex, index, "reps", e.target.value);
+                          }}
+                          value={set.reps}
+                          placeholder="reps"
+                          last={last}
+                        />
 
-              <div className="w-100">
-                <div className="d-flex">
-                  <Select
-                    options={options.map((option) => {
-                      return {
-                        value: index + " " + option.value,
-                        label: option.label,
-                      };
-                    })}
-                    onChange={chooseExercise}
-                    className="w-50"
-                  />
-                  <Button
-                    className="btn-outline-danger rounded-circle btn-light mt-auto btn-sm ms-1 mb-1"
-                    onClick={() => {
-                      removeExerSet(index);
-                    }}
-                  >
-                    -
-                  </Button>
-                </div>
-
-                {exerSet.sets.map((set, index2) => {
-                  return <SetView index1={index} index2={index2} set={set} />;
-                })}
-                <AddSetBtn index={index} />
-              </div>
-            </div>
+                        {!last && (
+                          <Button
+                            className="bg-transparent btn-outline-light text-danger py-0 px-1 ms-3"
+                            onClick={() => {
+                              removeSet(exerIndex, index);
+                            }}
+                          >
+                            -
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </Card.Text>
+              </Card.Body>
+            </Card>
           );
         })}
-        <Button className="btn-outline-info btn-light w-25" onClick={addExer}>
-          <h5>+ Exercise</h5>
-        </Button>
-        <div className="text-center">
+        <div className="d-flex flex-column">
           <Button
-            block
-            size="lg"
-            type="submit"
-            className="submit-btn btn-success w-50"
+            className="btn-light btn-outline-success h-25 "
+            onClick={addExer}
+          >
+            Add Exercise
+          </Button>
+          <Button
+            className="
+            btn-success"
+            onClick={Create}
           >
             Create
           </Button>
         </div>
-      </Form>
+      </div>
     </>
   );
 }

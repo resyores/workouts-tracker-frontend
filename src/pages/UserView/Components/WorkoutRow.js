@@ -1,7 +1,8 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
 import FormatDate from "../../../utils/FormatDate";
-export default function Workout({ workout, mine, functions }) {
+export default function Workout({ workout, mine, changeState }) {
   function publicToString(isPublic) {
     if (isPublic) return <p class="text-info">public</p>;
     return <p class="text-muted">private</p>;
@@ -10,67 +11,53 @@ export default function Workout({ workout, mine, functions }) {
     if (isPublic) return "UnShare";
     return "Share";
   }
-  function publicToChangeStringColor(isPublic) {
-    if (isPublic) return "warning";
-    return "primary";
-  }
-  function deleteThis() {
-    functions.onDelete(workout.WorkoutId);
-  }
+
   function changeThis() {
-    functions.changeState(workout.WorkoutId);
+    changeState(workout.WorkoutId);
   }
 
-  function Buttons() {
-    if (mine)
-      return (
-        <>
-          <Button
-            size="lg"
-            onClick={changeThis}
-            className={
-              "rounded btn-sm btn h-25 mt-4  btn-" +
-              publicToChangeStringColor(workout.public)
-            }
-          >
-            {publicToChangeString(workout.public)}
-          </Button>
-          <Button
-            onClick={deleteThis}
-            className="rounded-circle btn-sm btn h-25  mt-4 btn-light btn-outline-danger"
-          >
-            X
-          </Button>
-        </>
-      );
-  }
-  return (
-    <div className="d-flex">
-      <a
-        href={"/workouts/" + workout.WorkoutId}
-        className="list-group-item list-group-item-action rounded-pill mt-2 "
-        aria-current="false"
+  const ShareButton = () => {
+    return (
+      <Button
+        size="lg"
+        onClick={changeThis}
+        className="rounded btn-sm  btn-success btn-sml w-50"
       >
-        <div className="d-flex justify-content-around ">
-          <div>
-            <h5 className="mb-2">{workout.Title}</h5>
-            <small>{publicToString(workout.public)}</small>
-          </div>
-          <div className="d-flex">
-            <small className="mt-1 me-1">
-              {FormatDate(workout.WorkoutDate)}
-            </small>
-            {mine && workout.unseen > 0 && (
-              <div>
-                <small className="rounded-circle bg-primary text-white px-1">
-                  {workout.unseen}
-                </small>
-              </div>
-            )}
-          </div>
-        </div>
-      </a>
-      {Buttons()}
+        {publicToChangeString(workout.public)}
+      </Button>
+    );
+  };
+  return (
+    <div className="d-flex ms-4">
+      <Card className="text-center" style={{ width: 200 }}>
+        <a
+          href={"/workouts/" + workout.WorkoutId}
+          className="text-decoration-none text-dark mt-2 "
+          aria-current="false"
+        >
+          <Card.Title>
+            <div className="d-flex justify-content-center">
+              <span className="me-1">{workout.Title}</span>
+              {mine && workout.unseen > 0 && (
+                <div>
+                  <small className="rounded-circle bg-light-green px-2 text-primary">
+                    {workout.unseen}
+                  </small>
+                </div>
+              )}
+            </div>
+          </Card.Title>
+          <Card.Body>
+            <Card.Text>{publicToString(workout.public)}</Card.Text>
+          </Card.Body>
+        </a>
+        <Card.Footer className="text-muted d-flex flex-column">
+          {FormatDate(workout.WorkoutDate)}
+          <span className="d-flex justify-content-center mt-2">
+            {mine && <ShareButton />}
+          </span>
+        </Card.Footer>
+      </Card>
     </div>
   );
 }

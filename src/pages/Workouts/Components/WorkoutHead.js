@@ -1,24 +1,35 @@
 import React from "react";
+import Button from "react-bootstrap/esm/Button";
 import FormatDate from "../../../utils/FormatDate";
 export default function WorkoutHead({ props }) {
   return (
-    <div class="d-flex justify-content-around w-100 bg-light border border-dark">
-      <span>
-        <span className="d-flex">
-          <h1>{props.title + "  "}</h1>
-          {props.userNameText()}
+    <div class=" bg-light border border-dark">
+      <div className="w-75 d-flex justify-content-between">
+        {props.mine ? (
+          <Button
+            onClick={props.deleteWorkout}
+            className="btn-danger h-50 justify-content-center"
+          >
+            Delete
+          </Button>
+        ):<p/>}
+        <span>
+          <span className="d-flex">
+            <h3>{props.title + "  "}</h3>
+            {props.userNameText()}
+          </span>
+          <p className="text-primary">{FormatDate(props.date)}</p>
         </span>
-        <p className="text-primary">at {FormatDate(props.date)}</p>
-      </span>
-      <div>
-        {props.publicToString()}
-        <img
-          className="mt-4 me-0"
-          src={props.commentLogo}
-          width={30}
-          height={30}
-          onClick={props.onClickCommentsButton}
-        />
+        <div>
+          {props.publicToString()}
+          <img
+            className="mt-3 me-0"
+            src={props.commentLogo}
+            width={30}
+            height={30}
+            onClick={props.onClickCommentsButton}
+          />
+        </div>
       </div>
     </div>
   );

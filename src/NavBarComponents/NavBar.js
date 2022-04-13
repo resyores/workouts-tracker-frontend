@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import EmptyPicture from "../logos/profile.jpg";
 import ImageModal from "./ImageModal";
 import axios from "axios";
 import io from "socket.io-client";
 import Toast from "react-bootstrap/Toast";
-import Home from "../pages/UserView/pages/Home";
-export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
+import Dropdown from "react-bootstrap/Dropdown";
+import { useNavigate } from "react-router-dom";
+export default function Navbar({ cookies, logout, setMiddleMan }) {
+  const Navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const ProfileUrl = `${window.env.API}/user/${cookies.user.UserID}/profile`;
   const [imageUrl, setImageUrl] = useState(ProfileUrl);
   const [show, setShow] = useState(false);
   const [toastData, setToastData] = useState({});
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   useEffect(() => setImageUrl(ProfileUrl + "?" + Date.now()), [isOpen]);
   function upload(File) {
     const formData = new FormData();
@@ -40,7 +43,8 @@ export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
         workout.WorkoutId = WorkoutId;
         if (sender.UserID != cookies.user.UserID) {
           AlertWorkout(workout, sender, content);
-          setWorkoutUpdated(workout);
+          if (window.location.pathname.toLowerCase() == "/home")
+            setMiddleMan(workout);
         }
       });
     });
@@ -55,9 +59,43 @@ export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
       }
     });
   }
+
+  function Message() {
+    axios.post(window.env.API + "/Demo/SendMessage");
+  }
+  function Comment() {
+    axios.post(window.env.API + "/Demo/Comment").catch((err) => {
+      if (err.response.status == 400) {
+        alert("No workout to comment on");
+      }
+    });
+  }
+  function AddVideo() {
+    alert(
+      "The video is going to be added to the first set of your last workout"
+    );
+    axios
+      .get(window.env.API + "/user/" + cookies.user.UserID + "/workouts")
+      .then((res) => {
+        if (res.data.length == 0) alert("No workout to add video to");
+        else {
+          const WorkoutId = res.data[0].WorkoutId;
+          axios
+            .post(`http://localhost:4000/SetVideo/${WorkoutId}/0?mode=example`)
+            .then(() => {
+              if (
+                window.location.pathname.toLowerCase() ==
+                `/workouts/${WorkoutId}`
+              )
+                setMiddleMan(true);
+              else Navigate(`/workouts/${WorkoutId}`, { replace: true });
+            });
+        }
+      });
+  }
   return (
     <>
-      <nav className="p-3 navbar navbar-dark bg-primary navbar-expand-lg justify-content-between">
+      <nav className="p-3 navbar navbar-dark bg-success navbar-expand-lg justify-content-between">
         <ul className="navbar-nav mr-auto d-flex">
           <Link to="/Home" className="navbar-brand">
             Home
@@ -72,6 +110,23 @@ export default function Navbar({ cookies, logout, setWorkoutUpdated }) {
               Friends
             </Link>
           </li>
+          {cookies.user.demo && (
+            <Dropdown>
+              <Dropdown.Toggle variant="success" id="dropdown-basic">
+                Demo Actions
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={Comment}>
+                  Comment on the last workout
+                </Dropdown.Item>
+                <Dropdown.Item onClick={Message}>Message me</Dropdown.Item>
+                <Dropdown.Item onClick={AddVideo}>
+                  Add video to the last workout
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          )}
         </ul>
         {cookies.token != null && (
           <>
