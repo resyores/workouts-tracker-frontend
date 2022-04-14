@@ -81,7 +81,7 @@ export default function Navbar({ cookies, logout, setMiddleMan }) {
         else {
           const WorkoutId = res.data[0].WorkoutId;
           axios
-            .post(`http://localhost:4000/SetVideo/${WorkoutId}/0?mode=example`)
+            .post(`${window.env.API}/SetVideo/${WorkoutId}/0?mode=example`)
             .then(() => {
               if (
                 window.location.pathname.toLowerCase() ==
